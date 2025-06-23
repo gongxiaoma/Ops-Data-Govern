@@ -29,6 +29,7 @@ rm_file/
 /server/__debug_bin*
 server/uploads/
 /server/config.yaml
+ops-data-govern
 
 *.iml
 web/.pnpm-debug.log
