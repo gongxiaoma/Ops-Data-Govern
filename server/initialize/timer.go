@@ -3,7 +3,7 @@ package initialize
 import (
 	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/task"
-
+	"github.com/flipped-aurora/gin-vue-admin/server/task/es"
 	"github.com/robfig/cron/v3"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
@@ -24,14 +24,28 @@ func Timer() {
 			fmt.Println("add timer error:", err)
 		}
 
-		// 其他定时任务定在这里 参考上方使用方法
+		// 查询阿里云ES慢查询日志定时任务
+		aliTaskInterval := global.GVA_CONFIG.AliyunEs.TaskInterval
+		_, _err := global.GVA_Timer.AddTaskByFunc("AliEsSlowSearchLogSync", aliTaskInterval, func() {
+			err := es.AliyunEsSlowLogs()
+			if err != nil {
+				fmt.Println("timer error:", err)
+			}
+		}, "定时同步阿里云ES慢查询日志", option...)
+		if _err != nil {
+			fmt.Println("add timer error:", err)
+		}
 
-		//_, err := global.GVA_Timer.AddTaskByFunc("定时任务标识", "corn表达式", func() {
-		//	具体执行内容...
-		//  ......
-		//}, option...)
-		//if err != nil {
-		//	fmt.Println("add timer error:", err)
-		//}
+		// 查询华为云ES慢查询日志定时任务
+		hwTaskInterval := global.GVA_CONFIG.HwyunEs.TaskInterval
+		_, _err2 := global.GVA_Timer.AddTaskByFunc("HwEsSlowSearchLogSync", hwTaskInterval, func() {
+			err := es.HwyunEsSlowLogs()
+			if err != nil {
+				fmt.Println("timer error:", err)
+			}
+		}, "定时同步华为云ES慢查询日志", option...)
+		if _err2 != nil {
+			fmt.Println("add timer error:", err)
+		}
 	}()
 }

@@ -37,4 +37,13 @@ type Server struct {
 
 	// MCP配置
 	MCP MCP `mapstructure:"mcp" json:"mcp" yaml:"mcp"`
+
+	// 阿里云ES
+	AliyunEs AliyunEs `mapstructure:"ali-es" json:"ali-es" yaml:"ali-es"`
+
+	// 华为云ES
+	HwyunEs HwyunEs `mapstructure:"hw-es" json:"hw-es" yaml:"hw-es"`
+
+	// ES
+	Es Es `mapstructure:"es" json:"es" yaml:"es"`
 }
