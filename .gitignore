@@ -22,13 +22,13 @@ yarn-error.log*
 *.sw?
 
 rm_file/
-/server/config.yaml
 /server/log/
 /server/gva
 /server/server
 /server/latest_log
 /server/__debug_bin*
 server/uploads/
+/server/config.yaml
 
 *.iml
 web/.pnpm-debug.log
