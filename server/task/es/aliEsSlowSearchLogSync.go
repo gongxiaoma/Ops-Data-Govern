@@ -640,10 +640,24 @@ func BuildDocument(ctx context.Context, logEntry interface{}) (*esModel.AliEsSlo
 	}
 	formattedTime := t.Format("2006-01-02T15:04:05.000Z")
 
+	// 使用流式（非EncodeToken）脱敏，可以保证原始顺序，如果反序列化到map保证不了顺序（map遍历顺序是不确定的）
+	maskedStr, hashStr, dslFormat, err := utils.MaskAnyStream(resp.ContentCollection.Content, resp.InstanceID, resp.ContentCollection.IndexName, reqID)
+	if err != nil {
+		global.GVA_LOG.Error("对阿里云ES慢查询DSL脱敏处理异常",
+			zap.String("reqID", reqID),
+			zap.Error(err))
+		return nil, err
+	}
+	queryTemplate := maskedStr
+	checkSum := hashStr
+
 	doc := &esModel.AliEsSlowSearchLog{
 		EventTime:      formattedTime,
 		Timestamp:      resp.Timestamp,
 		QueryText:      resp.ContentCollection.Content,
+		QueryTemplate:  queryTemplate,
+		CheckSum:       checkSum,
+		DslFormat:      dslFormat,
 		DurationMs:     searchTimeMs,
 		IndexName:      resp.ContentCollection.IndexName,
 		NodeIp:         resp.ContentCollection.Host,

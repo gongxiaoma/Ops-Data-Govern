@@ -2,6 +2,7 @@ package es
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	esModel "github.com/flipped-aurora/gin-vue-admin/server/model/es"
@@ -450,29 +451,44 @@ func HwProcessSingleLog(ctx context.Context, clusterId string, esClient *elastic
 		shardTotal, _ = strconv.ParseInt(matches[1], 10, 64)
 	}
 
-	// 提取DSL字符串
-	if dslStart := strings.Index(logContent, "source["); dslStart > 0 {
-		dslStart += len("source[")
-		if dslEnd := strings.Index(logContent[dslStart:], "]"); dslEnd > 0 {
-			queryText = logContent[dslStart : dslStart+dslEnd]
-		}
+	// 从日志内容提取json格式dsl内容，第2个返回值obj是map[string]interface{}，可直接访问其中的字段，如obj["query"]
+	queryText, _, err = HwExtractDsl(logContent)
+	if err != nil {
+		global.GVA_LOG.Error("从日志内容提取json格式dsl内容失败",
+			zap.String("reqID", reqID),
+			zap.Error(err))
+		return err
 	}
+
+	// 使用流式（非EncodeToken）脱敏，可以保证原始顺序，如果反序列化到map保证不了顺序（map遍历顺序是不确定的）
+	maskedStr, hashStr, dslFormat, err := utils.MaskAnyStream(queryText, clusterId, indexName, reqID)
+	if err != nil {
+		global.GVA_LOG.Error("对华为云ES慢查询DSL脱敏处理异常",
+			zap.String("reqID", reqID),
+			zap.Error(err))
+		return err
+	}
+	queryTemplate := maskedStr
+	checkSum := hashStr
 
 	// 构建ES文档
 	doc := esModel.HwEsSlowSearchLog{
-		EventTime:  formattedTime,
-		Timestamp:  unixMilliTimestamp,
-		QueryText:  queryText,
-		DurationMs: durationMs,
-		IndexName:  indexName,
-		NodeName:   nodeName,
-		InstanceId: clusterId,
-		Level:      *logLevel,
-		SearchHits: searchHits,
-		SearchType: searchType,
-		ShardId:    shardID,
-		ShardTotal: shardTotal,
-		TaskId:     reqID,
+		EventTime:     formattedTime,
+		Timestamp:     unixMilliTimestamp,
+		QueryText:     queryText,
+		QueryTemplate: queryTemplate,
+		CheckSum:      checkSum,
+		DslFormat:     dslFormat,
+		DurationMs:    durationMs,
+		IndexName:     indexName,
+		NodeName:      nodeName,
+		InstanceId:    clusterId,
+		Level:         *logLevel,
+		SearchHits:    searchHits,
+		SearchType:    searchType,
+		ShardId:       shardID,
+		ShardTotal:    shardTotal,
+		TaskId:        reqID,
 	}
 
 	// 构建带日期的索引
@@ -582,6 +598,39 @@ func HwExtractNodes(response *model.ShowClusterDetailResponse) []string {
 		}
 	}
 	return nodes
+}
+
+// HwExtractDsl 获取华为云ES集群详情
+// @param logContent 日志原始结构
+// @return string
+// @return 对象
+func HwExtractDsl(logContent string) (string, map[string]interface{}, error) {
+	// 找到 source[
+	start := strings.Index(logContent, "source[")
+	if start == -1 {
+		return "", nil, fmt.Errorf("no source[ found")
+	}
+	start += len("source[")
+
+	sub := logContent[start:]
+
+	// 使用 json.RawMessage 获取原始 JSON
+	var raw json.RawMessage
+	dec := json.NewDecoder(strings.NewReader(sub))
+	if err := dec.Decode(&raw); err != nil {
+		return "", nil, fmt.Errorf("json decode failed: %w", err)
+	}
+
+	// raw 本身就是原始 JSON 字符串
+	jsonPart := string(raw)
+
+	// 解析成 map[string]interface{}
+	var obj map[string]interface{}
+	if err := json.Unmarshal(raw, &obj); err != nil {
+		return "", nil, fmt.Errorf("json unmarshal to map failed: %w", err)
+	}
+
+	return jsonPart, obj, nil
 }
 
 // HwyunEsSlowLogs 程序入口
