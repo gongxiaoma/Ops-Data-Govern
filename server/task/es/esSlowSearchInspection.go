@@ -71,7 +71,7 @@ func ReportSlowSearch(result SlowSearchResult) error {
 	// 构造请求体
 	reqData := InspectionRequest{
 		Date:             currentTime,
-		BusinessType:     "搜电",
+		BusinessType:     global.GVA_CONFIG.EsInspection.SdBrand,
 		InspectionType:   "SlowSQL",
 		InspectionName:   "ES慢查询",
 		InspectionResult: result,
@@ -127,12 +127,12 @@ func FetchSlowSearchAgg(client *elastic.Client) ([]SlowSearchResult, error) {
 	}{
 		{
 			Name:  fmt.Sprintf("ali_es_slow_search_log-%s", yesterday),
-			Brand: "搜电",
+			Brand: global.GVA_CONFIG.EsInspection.SdBrand,
 			Query: elastic.NewRangeQuery("durationMs").Gte(global.GVA_CONFIG.EsInspection.AliSlowThreshold),
 		},
 		{
 			Name:  fmt.Sprintf("hw_es_slow_search_log-%s", yesterday),
-			Brand: "街电",
+			Brand: global.GVA_CONFIG.EsInspection.JdBrand,
 			Query: elastic.NewRangeQuery("durationMs").Gte(global.GVA_CONFIG.EsInspection.HwSlowThreshold),
 		},
 	}
