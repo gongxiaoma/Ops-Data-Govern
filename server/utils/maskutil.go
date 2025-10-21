@@ -136,7 +136,7 @@ func writeToken(dec *json.Decoder, buf *bytes.Buffer) error {
 			}
 
 			if allPrim {
-				// ✅ 所有元素都是原子 -> 统一替换为单元素数组 ["?"]
+				// 所有元素都是原子 -> 统一替换为单元素数组 ["?"]
 				buf.WriteString(`["?"]`)
 				return nil
 			}

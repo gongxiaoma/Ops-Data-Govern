@@ -46,4 +46,10 @@ type Server struct {
 
 	// ES
 	Es Es `mapstructure:"es" json:"es" yaml:"es"`
+
+	// ES热点线程
+	EsHotThread EsHotThread `mapstructure:"es-hot-thread" json:"es-hot-thread" yaml:"es-hot-thread"`
+
+	// ES慢查询巡检上报
+	EsInspection EsInspection `mapstructure:"es-inspection" json:"es-inspection" yaml:"es-inspection"`
 }

@@ -2,6 +2,8 @@ package es
 
 import (
 	"context"
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
@@ -471,6 +473,10 @@ func HwProcessSingleLog(ctx context.Context, clusterId string, esClient *elastic
 	queryTemplate := maskedStr
 	checkSum := hashStr
 
+	// 计算原始DSL语句的MD5
+	dslHash := md5.Sum([]byte(queryText))
+	dslHashStr := hex.EncodeToString(dslHash[:])
+
 	// 构建ES文档
 	doc := esModel.HwEsSlowSearchLog{
 		EventTime:     formattedTime,
@@ -478,6 +484,7 @@ func HwProcessSingleLog(ctx context.Context, clusterId string, esClient *elastic
 		QueryText:     queryText,
 		QueryTemplate: queryTemplate,
 		CheckSum:      checkSum,
+		DslHash:       dslHashStr,
 		DslFormat:     dslFormat,
 		DurationMs:    durationMs,
 		IndexName:     indexName,

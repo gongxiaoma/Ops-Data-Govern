@@ -47,5 +47,29 @@ func Timer() {
 		if _err2 != nil {
 			fmt.Println("add timer error:", err)
 		}
+
+		// 查询ES热点线程
+		esHotThreadTaskInterval := global.GVA_CONFIG.EsHotThread.TaskInterval
+		_, _err3 := global.GVA_Timer.AddTaskByFunc("EsHotThread", esHotThreadTaskInterval, func() {
+			err := es.HotThreadsSync()
+			if err != nil {
+				fmt.Println("timer error:", err)
+			}
+		}, "定时查询ES热点线程", option...)
+		if _err3 != nil {
+			fmt.Println("add timer error:", err)
+		}
+
+		// ES慢查询巡检上报
+		esSlowSearchInspectionTaskInterval := global.GVA_CONFIG.EsInspection.TaskInterval
+		_, _err4 := global.GVA_Timer.AddTaskByFunc("SlowSearchInspection", esSlowSearchInspectionTaskInterval, func() {
+			err := es.SlowSearchInspection()
+			if err != nil {
+				fmt.Println("timer error:", err)
+			}
+		}, "ES慢查询巡检上报", option...)
+		if _err4 != nil {
+			fmt.Println("add timer error:", err)
+		}
 	}()
 }

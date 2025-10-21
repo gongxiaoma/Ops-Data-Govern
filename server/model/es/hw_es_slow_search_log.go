@@ -7,7 +7,8 @@ type HwEsSlowSearchLog struct {
 	Timestamp     int64   `json:"@timestamp"`    // 时间戳
 	QueryText     string  `json:"queryText"`     // 原始查询语句
 	QueryTemplate string  `json:"queryTemplate"` // 原始查询脱敏数据
-	CheckSum      string  `json:"checkSum"`      // 原始查询脱敏数据Hash值
+	CheckSum      string  `json:"checkSum"`      // 脱敏DSL语句Hash
+	DslHash       string  `json:"dslHash"`       // 原始DSL语句Hash
 	DslFormat     string  `json:"dslFormat"`     // DSL格式
 	DurationMs    float64 `json:"durationMs"`    // 查询耗时(ms)
 	IndexName     string  `json:"indexName"`     // 查询的索引

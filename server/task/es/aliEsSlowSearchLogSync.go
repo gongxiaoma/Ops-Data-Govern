@@ -3,6 +3,8 @@ package es
 import (
 	"bytes"
 	"context"
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -651,12 +653,17 @@ func BuildDocument(ctx context.Context, logEntry interface{}) (*esModel.AliEsSlo
 	queryTemplate := maskedStr
 	checkSum := hashStr
 
+	// 计算原始DSL语句的MD5
+	dslHash := md5.Sum([]byte(resp.ContentCollection.Content))
+	dslHashStr := hex.EncodeToString(dslHash[:])
+
 	doc := &esModel.AliEsSlowSearchLog{
 		EventTime:      formattedTime,
 		Timestamp:      resp.Timestamp,
 		QueryText:      resp.ContentCollection.Content,
 		QueryTemplate:  queryTemplate,
 		CheckSum:       checkSum,
+		DslHash:        dslHashStr,
 		DslFormat:      dslFormat,
 		DurationMs:     searchTimeMs,
 		IndexName:      resp.ContentCollection.IndexName,

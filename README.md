@@ -15,6 +15,9 @@ Ops-Data-Govern 是一款基于优秀开源框架 [gin-vue-admin](https://github
 ## 核心功能
 
 ### 1. ElasticSearch慢查询
-| 功能模块       | 技术实现                      | 性能指标               |
+| 功能模块       | 技术实现                      | 说明               |
 |----------------|-----------------------------|-----------------------|
 | 阿里云ElasticSearch慢查询      | 多线程调用阿里云API接口 + Bulk批量更新       | 根据参数化配置batch-size，实现秒级同步插入       |
+| 华为云ElasticSearch慢查询      | 多线程调用华为云API接口 + 非Bulk批量更新      | 实现秒级同步插入       |
+| ElasticSearch获取热点线程      | 调用热点线程API       | 支持CPU/WAIT/BLOCK       |
+| ElasticSearch慢查询巡检展示    | 分桶聚合并获取样本数据       | 巡检结果展示       |
