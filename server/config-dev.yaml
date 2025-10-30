@@ -247,7 +247,7 @@ zap:
     retention-day: -1
 
 ali-es:
-    cipher-key: ""
+    cipher-key: "ShenZhen@NanShan"
     aliyun-key: ""
     aliyun-secret: ""
     region: "cn-shenzhen"
@@ -257,25 +257,25 @@ ali-es:
     batch-size: 500
     minutes-back: 5
     es-list:
-        - "华为云阿里云ES集群名称"
-        - "华为云阿里云ES集群名称"
-        - "华为云阿里云ES集群名称"
-        - "华为云阿里云ES集群名称"
-        - "华为云阿里云ES集群名称"
+        - "es-cn-nji1234567890uy"
+        - ""
+        - ""
+        - ""
+        - ""
 
 hw-es:
-    cipher-key: ""
+    cipher-key: "ShenZhen@NanShan"
     hwyun-key: ""
     hwyun-secret: ""
     region: "cn-south-1"
     context-timeout: 5
     task-interval: "@every 2m"
-    max-concurrency: 3
+    max-concurrency: 2
     es-list:
-        - "华为云CSS集群ID"
-        - "华为云CSS集群ID"
-        - "华为云CSS集群ID"
-        - "华为云CSS集群ID"
+        - "1234567-1234-5678-cee2-28116bear22b"
+        - ""
+        - ""
+        - ""
 
 es:
     cluster-node:
@@ -284,3 +284,47 @@ es:
         - "http://172.16.113.190:9200"
     username: ""
     password: ""
+
+es-hot-thread:
+    task-interval: "@every 600s"
+    # 阿里云ES实例集群
+    aliyun:
+        - instance-id: "aliyun-test-001"
+          endpoint: "http://172.16.113.189:9200"
+          username: ""
+          password: ""
+          timeout: 30
+          max-retries: 3
+          enable-sniff: false
+          es-tag: aliyun
+          hot-interval: 1s
+          hot-threads: 10
+          hot-type: cpu
+
+    # 华为云ES实例集群
+    huawei:
+        - instance-id: "huawei-test-001"
+          endpoint: "http://172.16.113.189:9200"
+          username: ""
+          password: ""
+          timeout: 30
+          max-retries: 3
+          enable-sniff: false
+          es-tag: huawei
+          hot-interval: 1s
+          hot-threads: 10
+          hot-type: cpu
+
+es-inspection:
+    task-interval: "0 11 11 * * *"
+    ali-slow-threshold: 1000
+    hw-slow-threshold: 3000
+    inspection-url: "https://ops.test.net/PushInspection/"
+    inspection-bearer: "Bearer 1234567890"
+    inspection-type: "SlowSQL"
+    inspection-name: "ES慢查询"
+    sd-brand: "某品牌1"
+    jd-brand: "某品牌2"
+    instance-name-map:
+        es-cn-nji1234567890uy: "订单ES"
+        1234567-1234-5678-cee2-28116bear22b: "账单ES"
