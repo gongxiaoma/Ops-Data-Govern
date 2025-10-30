@@ -13,8 +13,6 @@ import (
 func MaskAnyStream(dsl string, clusterId string, indexName string, reqId string) (string, string, string, error) {
 	// 先尝试 JSON 解析
 	if json.Valid([]byte(dsl)) {
-		global.GVA_LOG.Warn("DSL是标准的JSON，调用JSON脱敏方法",
-			zap.String("reqID", reqId))
 		return MaskJSONStream(dsl)
 	} else {
 		global.GVA_LOG.Warn("DSL不是标准的JSON（阿里云接口返回不完整），现调用非JSON脱敏方法",

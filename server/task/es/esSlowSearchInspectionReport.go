@@ -72,8 +72,8 @@ func ReportSlowSearch(result SlowSearchResult) error {
 	reqData := InspectionRequest{
 		Date:             currentTime,
 		BusinessType:     global.GVA_CONFIG.EsInspection.SdBrand,
-		InspectionType:   "SlowSQL",
-		InspectionName:   "ES慢查询",
+		InspectionType:   global.GVA_CONFIG.EsInspection.InspectionType,
+		InspectionName:   global.GVA_CONFIG.EsInspection.InspectionName,
 		InspectionResult: result,
 	}
 
@@ -254,6 +254,17 @@ func SlowSearchInspection() (_err error) {
 		//fmt.Printf("  平均耗时: %.2f ms\n", r.AverageExecutionTime)
 		//fmt.Printf("  最大耗时: %.2f ms\n", r.MaxExecutionTime)
 		//fmt.Printf("  查询语句: %s\n\n", r.SQLText)
+
+		// 从配置中获取中文名
+		if cnName, ok := global.GVA_CONFIG.EsInspection.InstanceNameMap[r.DBInstanceName]; ok {
+			r.DBInstanceName = cnName
+		} else {
+			defaultName := "未命名实例-" + r.DBInstanceName
+			global.GVA_LOG.Warn("ES实例ID未配置映射，使用默认名称",
+				zap.String("实例ID", r.DBInstanceName),
+				zap.String("默认名称", defaultName))
+			r.DBInstanceName = defaultName
+		}
 
 		// 将单条慢查询作为参数传给巡检上报接口
 		err := ReportSlowSearch(r)
